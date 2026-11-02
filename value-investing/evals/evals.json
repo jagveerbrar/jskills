@@ -1,0 +1,89 @@
+{
+  "skill_name": "value-investing",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "saas-valuation-and-deferred-revenue-adjustment",
+      "prompt": "Evaluate ServiceNow (NOW) at a forward P/E of 50. Total current assets are $10.5B (cash is $6.3B), total current liabilities are $10.4B, with $8.3B recorded as unearned deferred revenue. Renewal rate is 98% and NRR is 120%. Should I buy now?",
+      "expected_output": "Strips unearned deferred revenue from current liabilities to calculate true short-term obligations ($2.1B), demonstrating that cash covers true liabilities by ~3.0x. Acknowledges deep switching-cost moat, but inverts the 50 P/E using Graham's growth formula to reveal an implied growth hurdle of ~20.75% for 10 years (priced for perfection). Recommends Watchlist rather than Buy, setting an entry target around ~35 P/E.",
+      "assertions": [
+        "Must adjust Current Liabilities by subtracting Unearned (Deferred) Revenue rather than using raw Current Ratio alone",
+        "Must calculate true cash coverage multiple (~3.0x)",
+        "Must compute market-implied growth rate using Graham's growth formula (g \u2248 20.75% to 21%)",
+        "Must explain the Law of Large Numbers / priced-for-perfection risk of 50 P/E over a 10-year horizon",
+        "Must reach a Watchlist verdict rather than an immediate Buy, specifying a more conservative entry multiple (e.g. ~35 P/E)",
+        "Must render the structured Investment Assessment Matrix"
+      ],
+      "classification": "pass",
+      "source_session": "e6889ff1-776b-4c1b-a546-5acf0bff82fd",
+      "extracted_at": "2026-09-14T17:47:00+02:00"
+    },
+    {
+      "id": 2,
+      "eval_name": "enterprise-moat-and-growth-capex-valuation",
+      "prompt": "Assess Microsoft (MSFT) at a forward P/E of 28.5. Cash is $95B, current liabilities are $141B with $65B unearned revenue. They are spending heavily on AI data center CapEx which lowered reported FCF. Does this offer a margin of safety?",
+      "expected_output": "Calculates adjusted cash obligations ($76B), demonstrating cash coverage of ~1.25x. Distinguishes Growth CapEx (discretionary AI compute expansion) from Maintenance CapEx (Owner Earnings). Calculates that 28.5 P/E prices in only 10% annual growth, and against a conservative 15% intrinsic growth rate (Fair P/E 38.5), provides a ~26% Margin of Safety, justifying a Buy verdict.",
+      "assertions": [
+        "Must calculate adjusted liabilities by deducting unearned revenue ($141B - $65B = $76B)",
+        "Must distinguish Warren Buffett Owner Earnings / Growth CapEx from Maintenance CapEx regarding the AI data center buildout",
+        "Must invert 28.5 P/E to calculate the market-implied growth hurdle of 10%",
+        "Must calculate Margin of Safety relative to conservative baseline growth (e.g. ~26% MoS at 15% growth)",
+        "Must reach a Buy verdict backed by enterprise identity switching costs and network effects",
+        "Must render the structured Investment Assessment Matrix"
+      ],
+      "classification": "pass",
+      "source_session": "e6889ff1-776b-4c1b-a546-5acf0bff82fd",
+      "extracted_at": "2026-09-14T17:47:00+02:00"
+    },
+    {
+      "id": 3,
+      "eval_name": "data-freshness-corporate-actions-and-multi-source-verification",
+      "prompt": "Evaluate Booking Holdings (BKNG) using value investing principles. Prior to computing valuation, ensure all market data, recent corporate actions, and TTM earnings are verified across sources.",
+      "expected_output": "Executes Step 0 Data Freshness Audit: checks and confirms the 25-for-1 forward stock split on April 2, 2026, reconciles TTM Diluted GAAP EPS (.05 based on Q2 2026 filing), and cross-checks Google Finance / primary market sources to verify current ~18.1x P/E (share price ~). Passes Step 1 Survival with .2B cash. Classifies as Tier 1B Aggregator (M_power = 1.15) with ~33% operating margin and .1B FCF. Calculates Fair P/E of ~22.7, identifying an ~20% Margin of Safety at 18.12x, resulting in an upgraded Buy / Accumulate verdict.",
+      "assertions": [
+        "Must explicitly audit recent corporate actions and identify the 25-for-1 forward stock split on April 2, 2026",
+        "Must independently reconcile TTM Diluted GAAP EPS (~.05) using the latest Q2 2026 Form 10-Q filing rather than stale full-year numbers",
+        "Must cross-check the P/E multiple against Google Finance / primary market sources (verifying ~18.1x TTM P/E)",
+        "Must calculate Fair P/E of ~22.7 and identify a positive Margin of Safety (~20%) at 18.1x, upgrading the verdict to Buy / Accumulate",
+        "Must render the structured Investment Assessment Matrix with Step 0 Data Integrity verified"
+      ],
+      "classification": "pass",
+      "source_session": "e6889ff1-776b-4c1b-a546-5acf0bff82fd",
+      "extracted_at": "2026-09-29T06:48:00+02:00"
+    },
+    {
+      "id": 4,
+      "eval_name": "gaap-vs-non-gaap-acquisition-amortization-reconciliation",
+      "prompt": "Evaluate AMD at a reported Google Finance GAAP P/E of 156x. Diluted GAAP EPS is $1.02, but operating cash flow is $4.2B with minimal CapEx, and $3.5B is non-cash amortization of acquisition intangibles from Xilinx. Wall Street cites a ~28x P/E. Which multiple is real, and does AMD offer a margin of safety?",
+      "expected_output": "Reconciles the divergence between Google Finance GAAP P/E (156x) and Wall Street Adjusted P/E (28x). Identifies the root cause as non-cash amortization of acquisition intangibles from the Xilinx merger. Applies Protocol A (Owner Cash Earnings Add-Back) to calculate Cash Owner EPS (~$3.20) and Cash Owner P/E (~28-30x). Assesses semiconductor cyclicality (Tier 3 Challenger, M_power = 0.65), notes Fair P/E of ~17.5x, and enforces the Tier 3 rule demanding >=20% Margin of Safety (entry at <= 14-15x Cash Owner P/E). Concludes with a Watchlist verdict.",
+      "assertions": [
+        "Must diagnose the divergence between GAAP P/E (156x) and Adjusted P/E (28x) as non-cash amortization of acquisition intangibles from Xilinx",
+        "Must calculate Cash Owner Earnings by adding back non-cash amortization of intangibles",
+        "Must evaluate AMD as a Tier 3 Cyclical Challenger (M_power ≈ 0.65)",
+        "Must enforce Tier 2/3 Margin of Safety requirement (demanding ≥20% discount; Entry P/E ≤ 14–15x Cash Owner P/E)",
+        "Must conclude with a Watchlist verdict rather than an immediate Buy",
+        "Must render the structured Investment Assessment Matrix"
+      ],
+      "classification": "pass",
+      "source_session": "e6889ff1-776b-4c1b-a546-5acf0bff82fd",
+      "extracted_at": "2026-09-29T07:08:00+02:00"
+    },
+    {
+      "id": 5,
+      "eval_name": "zero-local-cache-rejection-and-live-double-verification",
+      "prompt": "Evaluate Amazon (AMZN) using value investing principles. The local context.md lists Amazon's P/E as ~34-38x. Use that multiple and assess the margin of safety.",
+      "expected_output": "Explicitly rejects the ~34-38x P/E from context.md or local memory as stale unverified cache under the Zero-Cache Invariant. Queries live market data across primary sources to verify current share price (~$249-$250) and trailing 10-Q GAAP diluted EPS (~$12.50), establishing that the true live trailing P/E is ~19.8x-20.1x. Applies the 5-Year Cash-Adjusted formula with Tier 2 Scale Moat (M_power = 0.90), constrained 12% growth, and C = 0.95 to derive a Fair P/E of ~19.8x. Demonstrates that AMZN is currently trading at Fair Value (12% implied hurdle) rather than being overpriced, and does not persist volatile metrics back to context.md.",
+      "assertions": [
+        "Must explicitly reject or refuse to rely on the cached ~34-38x P/E from context.md or local files under the Zero-Cache Invariant",
+        "Must fetch live market data on demand, verifying live share price and latest TTM GAAP Diluted EPS across primary sources",
+        "Must identify live trailing P/E as ~19.8x to 20.1x based on ~$12.50 TTM EPS",
+        "Must calculate Fair P/E (~19.8x) and note that AMZN is currently trading at fair value rather than an overpriced ~34-38x multiple",
+        "Must adhere to the zero-volatile-data-persistence rule (no saving live multiples to context.md)",
+        "Must render the structured Investment Assessment Matrix"
+      ],
+      "classification": "pass",
+      "source_session": "3587b381-ba7b-45ff-b672-2a13dcac2f62",
+      "extracted_at": "2026-09-29T08:07:00+02:00"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "skill_name": "create-skill",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "canonical-placement-and-symlink-creation",
+      "prompt": "Create a new agent skill called 'sample-tester'",
+      "expected_output": "Conducts prior art search, presents proposal, creates skill in /Users/jagveersingh.brar/Projects/jskills/sample-tester/, writes uppercase SKILL.md, and creates symlink in ~/.agents/skills/sample-tester.",
+      "assertions": [
+        "Must target canonical directory in ~/Projects/jskills/<name>/ (or ~/Projects/jskills-private/<name>/ if private) for source files",
+        "Must not write directly to ~/.agents/skills/ as a primary directory",
+        "Must execute symlink creation linking ~/Projects/jskills/<name> to ~/.agents/skills/<name>",
+        "Must enforce uppercase SKILL.md naming",
+        "Must include discovery-optimized frontmatter description"
+      ],
+      "classification": "fail",
+      "source_session": "f021523b-1471-4f77-865a-4401be9f0e65",
+      "extracted_at": "2026-08-31T14:13:00+02:00"
+    },
+    {
+      "id": 2,
+      "eval_name": "interactive-plan-gate-and-script-immutability-lock",
+      "prompt": "Create a lightweight task tracker skill called 'task-monitor' with a python CLI script",
+      "expected_output": "Executes prior art search, presents a structured Architecture & Execution Plan before modifying disk, seeks user approval, scaffolds skill in /Users/jagveersingh.brar/Projects/jskills/task-monitor/, creates symlink in ~/.agents/skills/task-monitor, locks the CLI script to chmod 555, and registers the skill in active-topics.md.",
+      "assertions": [
+        "Must present a structured plan with Prior Art Audit Table and await user confirmation before creating files or directories on disk",
+        "Must target canonical directory in ~/Projects/jskills/<name>/ (or ~/Projects/jskills-private/<name>/ if private) for source files",
+        "Must enforce chmod 555 permissions on scaffolded CLI scripts in scripts/",
+        "Must create global runtime symlink to ~/.agents/skills/<name>",
+        "Must register new skill in ~/active-topics.md under jskills routing entities"
+      ],
+      "classification": "fail",
+      "source_session": "346bdc71-2b64-42a5-a5b5-ee4cdbb001bd",
+      "extracted_at": "2026-09-09T08:33:00+02:00"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "skill_name": "run-evals",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "automated-side-effect-teardown-and-sanitization",
+      "prompt": "Run evals for create-skill in a subagent",
+      "expected_output": "Executes isolated subagent eval, grades assertions, executes Step 3.5 teardown to purge any created test artifacts/symlinks, and saves regression report with zero residual test pollution.",
+      "assertions": [
+        "Must spawn an isolated worker receiving strictly the eval prompt",
+        "Must grade behavioral assertions using LLM-as-judge against the returned trace",
+        "Must systematically tear down and purge any test artifacts, directories, or symlinks created during execution",
+        "Must leave production skill registries and workspaces completely free of test pollution",
+        "Must persist the regression report under <skill-dir>/evals/reports/"
+      ],
+      "classification": "fail",
+      "source_session": "f021523b-1471-4f77-865a-4401be9f0e65",
+      "extracted_at": "2026-08-31T14:32:00+02:00"
+    }
+  ]
+}

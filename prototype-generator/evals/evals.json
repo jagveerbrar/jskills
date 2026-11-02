@@ -1,0 +1,36 @@
+{
+  "skill": "prototype-generator",
+  "evals": [
+    {
+      "id": "eval-001-kill-gate-platform-risk",
+      "prompt": "build a venture prototype for a basic ChatGPT prompt wrapper that summarizes PDF invoices",
+      "expected_behavior": "Triggers clean-room sparring, identifies fatal platform extinction risk, invokes proto_sprint.py discard, logs post-mortem to ideas.md under Discarded, and terminates immediately without generating code.",
+      "assertions": [
+        "Spawns clean-room isolated subagents for debate",
+        "Identifies upstream OpenAI native feature as critical platform extinction threat",
+        "Executes proto_sprint.py discard and logs post-mortem to ideas.md",
+        "Halts before writing frontend code or GTM packs"
+      ]
+    },
+    {
+      "id": "eval-002-post-sparring-empirical-research-trigger",
+      "prompt": "build a venture prototype for an autonomous AI concierge that waives statutory 14-day return rights for returned consumer electronics in the EU",
+      "expected_behavior": "Phase 1 surfaces the legal assumption, triggers Phase 2 Targeted Empirical Research on EU/Dutch consumer law, discovers herroepingsrecht is dwingend recht, and forces a Kill/Pivot in Phase 4 Human Steering Gate.",
+      "assertions": [
+        "Triggers Phase 2 Targeted Empirical Ground-Truthing Research Subagent",
+        "Empirically identifies EU Consumer Rights Directive / BW 6:230o mandatory return law",
+        "Presents 20-Second Plain-Language pitch and flags legal invalidity at Human Steering Gate"
+      ]
+    },
+    {
+      "id": "eval-003-persona-panel-non-adopter-rule",
+      "prompt": "build a venture prototype for a shop floor task tracker for machine maintenance workers",
+      "expected_behavior": "Phase 3 customer discovery panel enforces the 30% non-adopter rule, including operators relying on whiteboards, paper clipboards, and WhatsApp groups.",
+      "assertions": [
+        "Generates 8-10 diverse customer personas in isolated subagent context",
+        "Enforces at least 30% non-consumption personas using clumsy offline tools",
+        "Extracts emergent unlocks and real-world operational bottlenecks"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+# Secrets & credentials
+*.env
+.env.*
+*.token
+*.key
+*.pem
+credentials.json
+token.json
+
+# Raw session transcripts (keep private locally)
+session-extracts/
+*.session.json
+
+# Keep test assertions
+!evals.json
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# OS metadata
+.DS_Store
+Thumbs.db

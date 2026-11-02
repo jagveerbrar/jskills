@@ -1,0 +1,66 @@
+{
+  "skill_name": "evolve-skill",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "post-evolution-cso-security-audit-and-permission-lock",
+      "prompt": "/evolve-skill evolve evolve-skill skill to run /cso after evolving any skill",
+      "expected_output": "Orchestrates skill evolution, codifying mandatory post-evolution CSO security audits and chmod 555 permission locks for any modified scripts/tools into the workflow steps, executes evals, and outputs a consolidated report containing the CSO audit status.",
+      "assertions": [
+        "Must incorporate Step 5: Post-Evolution CSO Security Audit & Permission Lock into the evolve-skill execution workflow",
+        "Must mandate security inspection covering command injection, path traversal, OAuth scopes, and secret hygiene for modified scripts",
+        "Must mandate reverting and enforcing chmod 555 permission locks on all modified helper scripts",
+        "Must surface the CSO Security Audit status and permission lock in the final evolution summary",
+        "Must verify all assertions in an isolated subagent before completing the evolution"
+      ],
+      "classification": "pass",
+      "source_session": "02111749-bdba-4dbb-a3ed-988f66b20f9c",
+      "extracted_at": "2026-09-02T11:51:00+02:00"
+    },
+    {
+      "id": 2,
+      "eval_name": "diagnostic-mode-and-staged-evolution-gate",
+      "prompt": "Figure out why inbox-triage omitted CC recipients and check if an eval exists for this. Just analyse for now, don't fix.",
+      "expected_output": "Performs a read-only root cause diagnosis on scripts/triage.py and SKILL.md, audits evals/evals.json for existing test coverage, identifies the CLI flag default and missing skill invariant without modifying any files or applying patches prematurely, and presents the findings in chat.",
+      "assertions": [
+        "Must perform deep root cause analysis identifying CLI defaults and skill invariant omissions",
+        "Must audit existing evals in evals/evals.json to verify whether the defect scenario was previously tested",
+        "Must strictly adhere to read-only constraint ('don't fix / analyze only') and not modify SKILL.md or scripts during diagnosis",
+        "Must present structured root cause and eval coverage audit findings in chat"
+      ],
+      "classification": "pass",
+      "source_session": "2dab5e83-d7f9-45b1-b563-6dad84b35a57",
+      "extracted_at": "2026-09-03T15:30:00+02:00"
+    },
+    {
+      "id": 3,
+      "eval_name": "read-only-eval-worker-and-orchestrator-reflection-boundary",
+      "prompt": "/evolve-skill the subagent running evals should never try to edit the scripts and skills being tested. The findings should be reported back and only evolve-skill should reflect on the findings to see the next best action, which might be those edits",
+      "expected_output": "Hardens evolve-skill and run-evals to enforce that test workers operate strictly in read-only execution mode without editing scripts or modifying file permissions, reporting findings back to the evolve-skill orchestrator which solely reflects on next actions and code patches.",
+      "assertions": [
+        "Must enforce that eval subagent workers operate in strict read-only execution mode and do NOT attempt to edit SKILL.md or underlying scripts",
+        "Must prohibit eval workers from executing permission changes (e.g. chmod) to unlock scripts",
+        "Must require eval subagent workers to report errors, selector mismatches, or script bugs directly in their output trace",
+        "Must establish that only the evolve-skill orchestrator reflects on subagent findings and decides whether to patch scripts or skills"
+      ],
+      "classification": "pass",
+      "source_session": "076d0ed1-10eb-4444-8fc5-caee31993447",
+      "extracted_at": "2026-09-04T13:17:30+02:00"
+    },
+    {
+      "id": 4,
+      "eval_name": "pre-mutation-blueprint-gate-and-downstream-ripple-audit",
+      "prompt": "/evolve-skill evolve yourself to identify improvements and run them by me before implementing",
+      "expected_output": "Synthesizes an Evolution Blueprint presenting root cause diagnosis, proposed SKILL.md/script diffs, and drafted assertions before modifying disk files, performs a downstream contract dependency audit across jskills/ and active registries, checks backwards compatibility against prior evals, and enforces persistence tooling hygiene.",
+      "assertions": [
+        "Must present a structured pre-mutation evolution blueprint (root cause, proposed diff, and drafted assertions) before applying disk modifications",
+        "Must audit downstream contract dependencies across jskills and registries to identify ecosystem ripple effects before finalizing patches",
+        "Must cross-examine prior eval assertions in evals.json to prevent regression of previously verified invariants",
+        "Must verify all assertions in an isolated subagent test runner operating strictly under the read-only execution boundary"
+      ],
+      "classification": "pass",
+      "source_session": "346bdc71-2b64-42a5-a5b5-ee4cdbb001bd",
+      "extracted_at": "2026-09-09T13:08:00+02:00"
+    }
+  ]
+}

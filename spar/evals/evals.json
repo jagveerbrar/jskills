@@ -1,0 +1,37 @@
+{
+  "skill_name": "spar",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "dialectical-sparring-challenge-and-creative-build",
+      "prompt": "Spar with me on my idea: Home Security Monitoring",
+      "expected_output": "Provides a sharp stress-test identifying fatal assumptions/margin traps, triages load-bearing vs. operational factors, and pairs it with either a creative lateral build (if pivoting) or strategic reinforcement before asking a single forcing question.",
+      "assertions": [
+        "Must deliver a critical stress-test identifying make-or-break vulnerabilities and a strategic move (either Reinforce or Creative Pivot)",
+        "Must not act solely as a destructive critic/auditor without offering constructive reframings, execution depth, or adjacent wedges",
+        "Must adhere to one-move-per-turn pacing (Assessment, Judgment Triage, Strategic Move, 1 Forcing Question)",
+        "Must avoid hollow validation or sycophantic praise",
+        "Must support --redteam and --expand mode modifiers when explicitly requested"
+      ],
+      "classification": "pass",
+      "source_session": "f021523b-1471-4f77-865a-4401be9f0e65",
+      "extracted_at": "2026-08-31T13:13:30+02:00"
+    },
+    {
+      "id": 2,
+      "eval_name": "load-bearing-judgment-and-value-prop-protection",
+      "prompt": "Spar with me on an agentic shopping gateway for WooCommerce stores. One concern is handling stock desync when an item has only 1 left.",
+      "expected_output": "Explicitly triages stock desync as an operational hygiene fact rather than a thesis-altering blocker, protects the core value proposition (AI shopping discovery and machine checkout parity) from dilution, genuinely agrees with the core direction, and focuses the strategic move on defensibility or distribution rather than inventing an artificial pivot.",
+      "assertions": [
+        "Must explicitly categorize surfaced points into load-bearing strategic factors vs. operational hygiene/implementation facts",
+        "Must not elevate operational safeguards (such as low-stock hiding, rate limits, or retry logic) into the core customer value proposition",
+        "Must take a genuine stance: agree and reinforce the direction when the core thesis is sound, rather than forcing an artificial pivot or lateral twist",
+        "Must reserve creative lateral twists or pivots strictly for fatal or load-bearing vulnerabilities",
+        "Must structure turn with Assessment, Judgment Triage, The Move (Reinforce), and exactly 1 Forcing Question"
+      ],
+      "classification": "pass",
+      "source_session": "7a865a6b-1bbc-4cfa-8fc7-63f9d3466869",
+      "extracted_at": "2026-10-01T10:22:00+02:00"
+    }
+  ]
+}

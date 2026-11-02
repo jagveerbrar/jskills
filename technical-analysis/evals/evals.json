@@ -1,0 +1,43 @@
+{
+  "skill": "technical-analysis",
+  "evals": [
+    {
+      "id": "eval-ta-snapshot-json",
+      "description": "Verifies that scripts/ta.py returns valid JSON structure with price, trend, oscillators, volatility, and levels for standard tickers.",
+      "command": "uv run ~/.agents/skills/technical-analysis/scripts/ta.py snapshot AAPL --json",
+      "assertions": [
+        {
+          "type": "json_keys_present",
+          "keys": ["ticker", "price", "trend", "moving_averages", "oscillators", "volatility", "volume", "levels"]
+        },
+        {
+          "type": "json_field_equals",
+          "field": "ticker",
+          "expected": "AAPL"
+        }
+      ]
+    },
+    {
+      "id": "eval-ta-levels-json",
+      "description": "Verifies that the levels subcommand returns 52-week extremes and classic/Fibonacci pivots.",
+      "command": "uv run ~/.agents/skills/technical-analysis/scripts/ta.py levels MSFT --json",
+      "assertions": [
+        {
+          "type": "json_keys_present",
+          "keys": ["52_week_high", "52_week_low", "classic_pivots", "fibonacci_pivots"]
+        }
+      ]
+    },
+    {
+      "id": "eval-ta-compare-execution",
+      "description": "Verifies comparative ranking across multiple equity tickers.",
+      "command": "uv run ~/.agents/skills/technical-analysis/scripts/ta.py compare GOOGL META NVDA --json",
+      "assertions": [
+        {
+          "type": "is_json_array",
+          "min_length": 3
+        }
+      ]
+    }
+  ]
+}

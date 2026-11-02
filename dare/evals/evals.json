@@ -1,0 +1,75 @@
+{
+  "skill_name": "dare",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "refurbished-returns-b2b2c-marketplace",
+      "prompt": "Run DARE on my idea: A dedicated marketplace like Marktplaats but only for verified business sellers, especially refurbishers and returns goods dealers, direct to consumers.",
+      "expected_output": "Decomposes marketplace operational parts without premature solutions, audits load-bearing trust and margin assumptions with inversions, recombines verified blocks into 3 structurally distinct models, and specifies low-cost falsification experiments with clear kill metrics.",
+      "assertions": [
+        "Must decompose operational constituent parts (sourcing, inspection, grading/warranty, buyer trust, reverse logistics) without proposing solutions in Stage D",
+        "Must audit load-bearing assumptions (e.g. grading trust, warranty costs, margins after returns) and specify elimination and 180-degree inversion impacts",
+        "Must synthesize 3 structurally distinct solutions constructed exclusively from verified building blocks, explicitly stating discarded conventions and points of failure",
+        "Must design concrete falsification experiments with explicit kill/rule-out metrics and keep-alive lines",
+        "Must maintain strict anti-sycophancy and avoid corporate fluff"
+      ],
+      "classification": "pass"
+    },
+    {
+      "id": 2,
+      "eval_name": "autonomous-platform-replicator",
+      "prompt": "Run DARE on my idea: An autonomous platform replicator that takes a platform like Marktplaats as input, decomposes it using massive ReAct agent cycles, and replicates the whole platform to be launched as a replacement to the original platform.",
+      "expected_output": "Checks for hidden objectives (code cloning vs two-sided liquidity replication), audits the fatal assumption that software features drive marketplace moats, recombines into 3 structurally distinct architectures, and designs fast falsification tests before compute expenditure.",
+      "assertions": [
+        "Must check for hidden objectives in Stage D (e.g. technical replication vs liquidity/trust network effects)",
+        "Must audit and classify the assumption that software parity creates platform adoption as an unexamined convention or false assumption",
+        "Must generate 3 structurally distinct solutions (not just variations of code generation) with explicit points of failure",
+        "Must specify rapid, low-cost falsification tests with clear rule-out thresholds before building full software",
+        "Must adhere to D.A.R.E. stage sequence and clean-room rigor"
+      ],
+      "classification": "pass"
+    },
+    {
+      "id": 3,
+      "eval_name": "corporate-upskilling-incubator",
+      "prompt": "Run DARE on my idea: Using corporate executive transition and L&D upskilling budgets for departing leaders to help them become AI-native operators, which evolves into an incubator.",
+      "expected_output": "Decomposes corporate budget mechanics, employer procurement, and leadership transition, audits employer spending mandates vs founder aptitude, recombines into 3 novel models, and designs fast validation tests with HR and executive stakeholders.",
+      "assertions": [
+        "Must decompose across funding mechanisms (transition/severance allocations), operator upskilling, and venture incubation mechanics in Stage D without premature advice",
+        "Must audit assumptions around corporate procurement approval, executive risk tolerance/founder conversion rate, and tax treatment of transition funds",
+        "Must recombine verified components into 3 structurally distinct operational models naming discarded conventions",
+        "Must design cheap falsification tests (e.g. enterprise HR/talent partner interviews, pilot pre-commitments) with explicit pass/fail lines",
+        "Must avoid flattering encouragement and maintain objective strategic rigor"
+      ],
+      "classification": "pass"
+    },
+    {
+      "id": 4,
+      "eval_name": "ai-native-micro-venture-launcher",
+      "prompt": "Run DARE on my idea: Opening up various small businesses such as drop shipping in an AI native way with near-zero human operational overhead.",
+      "expected_output": "Decomposes e-commerce/dropshipping unit economics, traffic acquisition, supplier fulfillment, and dispute resolution, audits margin viability in commoditized ad arbitrage, recombines into 3 non-standard venture structures, and designs strict loss-limited falsification tests.",
+      "assertions": [
+        "Must decompose the full operational stack (supply chain, ad spend, conversion, support, dispute resolution) without jumping to solutions",
+        "Must audit the load-bearing assumption that AI automation solves CAC fatigue or supplier unreliability in commoditized dropshipping",
+        "Must produce 3 structurally distinct AI-native micro-venture models with explicit discarded conventions and failure points",
+        "Must specify fast, budget-capped falsification tests ($0-$100 or manual concierge validation) with strict kill metrics",
+        "Must maintain high-signal, zero-fluff analysis"
+      ],
+      "classification": "pass"
+    },
+    {
+      "id": 5,
+      "eval_name": "direct-to-consumer-aggregator-disintermediation",
+      "prompt": "Run DARE on my idea: Creating a product that helps companies such as airlines and brand.com ecommerce sites to get more of direct sales in the AI age, reducing dependency on aggregators such as Booking.com and Zalando.",
+      "expected_output": "Decomposes consumer booking intent, aggregator discovery moats, price parity contracts, and agentic commerce protocols, audits the assumption of brand preference over aggregator convenience, recombines into 3 novel disintermediation architectures, and details concrete test experiments.",
+      "assertions": [
+        "Must decompose search intent capture, price parity constraints, loyalty mechanics, and checkout protocols without premature advice in Stage D",
+        "Must audit load-bearing assumptions around consumer search habits, OTA contract penalties, and AI agent purchasing autonomy",
+        "Must synthesize 3 structurally distinct solutions bypassing aggregator moats, explicitly naming discarded conventions and points of failure",
+        "Must design concrete falsification experiments with clear kill and keep-alive metrics",
+        "Must maintain rigorous First-Principles stage pacing and analytical depth"
+      ],
+      "classification": "pass"
+    }
+  ]
+}
