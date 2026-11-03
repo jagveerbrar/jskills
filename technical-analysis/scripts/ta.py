@@ -10,10 +10,13 @@
 import argparse
 import json
 import sys
+import warnings
 from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 import yfinance as yf
+
+warnings.filterwarnings("ignore")
 
 
 def fetch_ticker_data(ticker_symbol: str, period: str = "1y", interval: str = "1d") -> pd.DataFrame:
@@ -308,6 +311,174 @@ def compute_pivots_and_levels(df: pd.DataFrame) -> Dict[str, Any]:
     }
 
 
+def detect_trend_reversal(df: pd.DataFrame, current_regime: str = "Neutral") -> Dict[str, Any]:
+    """
+    Deterministically detect trend exhaustion, momentum inflection, and active trend reversals.
+    Evaluates:
+    1. MACD crossover recency (last 3 bars)
+    2. RSI extremes & exit/curling (last 5 bars)
+    3. Moving average reclaim or breakdown (20 SMA / 50 SMA)
+    4. Bollinger Band extreme rejections (%B < 0.05 or > 0.95)
+    5. Regular Bullish and Bearish Divergence (price swing vs RSI swing over 25 bars)
+    """
+    if len(df) < 25:
+        return {
+            "signal": "Insufficient Data",
+            "status": "INSUFFICIENT_DATA",
+            "confidence": "Low",
+            "plain_english": "Not enough historical price bars to assess trend reversal.",
+            "triggers_detected": [],
+            "bullish_triggers": [],
+            "bearish_triggers": [],
+        }
+
+    latest = df.iloc[-1]
+    prev = df.iloc[-2]
+
+    bull_triggers = []
+    bear_triggers = []
+
+    # 1. MACD Crossover in last 3 bars
+    macd_hist = df["MACD_Hist"]
+    if macd_hist.iloc[-1] > 0 and (macd_hist.iloc[-2] <= 0 or (len(df) > 2 and macd_hist.iloc[-3] <= 0)):
+        bull_triggers.append("MACD Bullish Cross: Momentum turned positive over signal line within last 3 sessions")
+    elif macd_hist.iloc[-1] < 0 and (macd_hist.iloc[-2] >= 0 or (len(df) > 2 and macd_hist.iloc[-3] >= 0)):
+        bear_triggers.append("MACD Bearish Cross: Momentum broke negative below signal line within last 3 sessions")
+
+    # 2. RSI Exhaustion / Exit from extremes (5-day window)
+    recent_5_rsi = df["RSI14"].iloc[-5:]
+    curr_rsi = float(latest["RSI14"])
+    prev_rsi = float(prev["RSI14"])
+
+    # Bullish: Was oversold <= 32 and is now curling upward
+    if recent_5_rsi.min() <= 32.0 and curr_rsi > 32.0 and curr_rsi > prev_rsi:
+        bull_triggers.append(f"RSI Oversold Bounce: Rebounded from oversold bottom ({recent_5_rsi.min():.1f}) up to {curr_rsi:.1f}")
+    # Bearish: Was overbought >= 68 and is now rolling over
+    if recent_5_rsi.max() >= 68.0 and curr_rsi < 68.0 and curr_rsi < prev_rsi:
+        bear_triggers.append(f"RSI Overbought Roll-Over: Dropped from overheated peak ({recent_5_rsi.max():.1f}) down to {curr_rsi:.1f}")
+
+    # 3. Moving Average Reclaim or Breakdown (last 2 bars)
+    curr_close = float(latest["Close"])
+    prev_close = float(prev["Close"])
+    sma20_curr = float(latest["SMA20"]) if pd.notna(latest["SMA20"]) else None
+    sma20_prev = float(prev["SMA20"]) if pd.notna(prev["SMA20"]) else None
+    sma50_curr = float(latest["SMA50"]) if pd.notna(latest["SMA50"]) else None
+    sma50_prev = float(prev["SMA50"]) if pd.notna(prev["SMA50"]) else None
+
+    if sma20_curr and sma20_prev:
+        if curr_close > sma20_curr and prev_close <= sma20_prev:
+            bull_triggers.append("20-Day SMA Reclaim: Price crossed back above short-term momentum line")
+        elif curr_close < sma20_curr and prev_close >= sma20_prev:
+            bear_triggers.append("20-Day SMA Breakdown: Price broke below short-term momentum line")
+
+    if sma50_curr and sma50_prev:
+        if curr_close > sma50_curr and prev_close <= sma50_prev:
+            bull_triggers.append("50-Day SMA Reclaim: Price recaptured key medium-term institutional floor")
+        elif curr_close < sma50_curr and prev_close >= sma50_prev:
+            bear_triggers.append("50-Day SMA Breakdown: Price cracked below 50-day institutional support")
+
+    # 4. Bollinger Band Extreme Rebound / Rejection
+    bb_pctb = df["BB_PctB"]
+    recent_4_pctb = bb_pctb.iloc[-4:]
+    if recent_4_pctb.min() < 0.05 and float(latest["BB_PctB"]) >= 0.15 and curr_close > prev_close:
+        bull_triggers.append("Bollinger Lower Band Rebound: Bounced off lower volatility floor")
+    elif recent_4_pctb.max() > 0.95 and float(latest["BB_PctB"]) <= 0.85 and curr_close < prev_close:
+        bear_triggers.append("Bollinger Upper Band Rejection: Pulled back from upper volatility ceiling")
+
+    # 5. Regular Price vs. RSI Divergence (25-bar lookback)
+    lookback = min(len(df), 25)
+    recent_df = df.iloc[-lookback:].copy()
+    lows = recent_df["Low"].values
+    highs = recent_df["High"].values
+    rsis = recent_df["RSI14"].values
+
+    swing_lows = []
+    for i in range(2, len(lows) - 2):
+        if lows[i] == min(lows[i - 2 : i + 3]):
+            swing_lows.append((i, lows[i], rsis[i]))
+
+    swing_highs = []
+    for i in range(2, len(highs) - 2):
+        if highs[i] == max(highs[i - 2 : i + 3]):
+            swing_highs.append((i, highs[i], rsis[i]))
+
+    if len(swing_lows) >= 2:
+        _, prev_low_val, prev_low_rsi = swing_lows[-2]
+        _, last_low_val, last_low_rsi = swing_lows[-1]
+        if last_low_val < prev_low_val and (last_low_rsi - prev_low_rsi) >= 2.0:
+            bull_triggers.append(f"Bullish Divergence: Lower price low (${last_low_val:.2f} vs ${prev_low_val:.2f}) with higher RSI low ({last_low_rsi:.1f} vs {prev_low_rsi:.1f})")
+
+    if len(swing_highs) >= 2:
+        _, prev_high_val, prev_high_rsi = swing_highs[-2]
+        _, last_high_val, last_high_rsi = swing_highs[-1]
+        if last_high_val > prev_high_val and (prev_high_rsi - last_high_rsi) >= 2.0:
+            bear_triggers.append(f"Bearish Divergence: Higher price high (${last_high_val:.2f} vs ${prev_high_val:.2f}) with lower RSI high ({last_high_rsi:.1f} vs {prev_high_rsi:.1f})")
+
+    # Composite Scoring & Synthesis
+    n_bull = len(bull_triggers)
+    n_bear = len(bear_triggers)
+
+    if n_bull >= 2 and n_bull > n_bear:
+        signal = "Bullish Reversal (Confirmed)"
+        status = "BULLISH_REVERSAL_CONFIRMED"
+        confidence = "High"
+        plain_english = "Multiple technical indicators confirm buyers are seizing control from sellers, signaling an emerging upward trend reversal."
+        active_triggers = bull_triggers
+    elif n_bull == 1 and n_bear == 0:
+        signal = "Bullish Reversal (Early / Emerging)"
+        status = "BULLISH_REVERSAL_EARLY"
+        confidence = "Moderate"
+        plain_english = "Early technical hints of seller exhaustion detected; watch for follow-through confirmation."
+        active_triggers = bull_triggers
+    elif n_bear >= 2 and n_bear > n_bull:
+        signal = "Bearish Reversal (Confirmed)"
+        status = "BEARISH_REVERSAL_CONFIRMED"
+        confidence = "High"
+        plain_english = "Multiple technical indicators confirm upward momentum has broken down, signaling an active downward reversal or correction."
+        active_triggers = bear_triggers
+    elif n_bear == 1 and n_bull == 0:
+        signal = "Bearish Reversal (Early / Emerging)"
+        status = "BEARISH_REVERSAL_EARLY"
+        confidence = "Moderate"
+        plain_english = "Early signs of buying fatigue detected; short-term rollover risk is elevated."
+        active_triggers = bear_triggers
+    elif n_bull > 0 and n_bear > 0:
+        signal = "Mixed / Conflicted Reversal Signals"
+        status = "MIXED_SIGNALS"
+        confidence = "Low"
+        plain_english = "Conflicting momentum signals detected (some bullish, some bearish); price is choppy without clean directional resolution."
+        active_triggers = bull_triggers + bear_triggers
+    else:
+        if "Bullish" in current_regime:
+            signal = "No Reversal (Uptrend Continuing)"
+            status = "TREND_CONTINUATION_UP"
+            confidence = "High"
+            plain_english = "No reversal detected. Prevailing upward trend remains healthy and intact without exhaustion signals."
+            active_triggers = ["Upward trend structure intact; no exhaustion signals"]
+        elif "Bearish" in current_regime:
+            signal = "No Reversal (Downtrend Continuing)"
+            status = "TREND_CONTINUATION_DOWN"
+            confidence = "High"
+            plain_english = "No bullish reversal detected yet. Selling pressure dominates and the downward trend remains firmly active."
+            active_triggers = ["Downward trend structure intact; no bottoming confirmation"]
+        else:
+            signal = "No Reversal (Neutral / Consolidating)"
+            status = "CONSOLIDATION"
+            confidence = "Moderate"
+            plain_english = "Price is moving sideways in consolidation. No trend reversal has been triggered."
+            active_triggers = ["Sideways price action; waiting for directional breakout"]
+
+    return {
+        "signal": signal,
+        "status": status,
+        "confidence": confidence,
+        "plain_english": plain_english,
+        "triggers_detected": active_triggers,
+        "bullish_triggers": bull_triggers,
+        "bearish_triggers": bear_triggers,
+    }
+
+
 def get_snapshot(ticker_symbol: str, period: str = "1y", interval: str = "1d") -> Dict[str, Any]:
     """Generate comprehensive technical snapshot including multi-timeframe weekly confluence."""
     raw_df = fetch_ticker_data(ticker_symbol, period=period, interval=interval)
@@ -385,6 +556,27 @@ def get_snapshot(ticker_symbol: str, period: str = "1y", interval: str = "1d") -
     weekly_info = compute_macro_weekly_context(ticker_symbol)
     confluence = evaluate_multi_timeframe_confluence(regime, weekly_info, rsi)
 
+    # Reversal Analysis & Executive Synthesis
+    reversal_info = detect_trend_reversal(df, regime)
+
+    if "Confirmed" in reversal_info["signal"]:
+        if "Bullish" in reversal_info["signal"]:
+            bottom_line = f"${ticker_symbol.upper()} is exhibiting a confirmed bullish trend reversal; buyers are seizing control."
+        else:
+            bottom_line = f"${ticker_symbol.upper()} is exhibiting a confirmed bearish trend reversal; short-term rollover risk is elevated."
+    elif "Early" in reversal_info["signal"]:
+        if "Bullish" in reversal_info["signal"]:
+            bottom_line = f"${ticker_symbol.upper()} is showing early bottoming/reversal hints, awaiting breakout follow-through."
+        else:
+            bottom_line = f"${ticker_symbol.upper()} is showing early buying fatigue and momentum rollover hints at elevated levels."
+    else:
+        if "Bullish" in regime:
+            bottom_line = f"${ticker_symbol.upper()} remains in an established upward trend with intact moving average support; no trend reversal detected."
+        elif "Bearish" in regime:
+            bottom_line = f"${ticker_symbol.upper()} remains in a downward trend under selling pressure; no bottoming reversal confirmed yet."
+        else:
+            bottom_line = f"${ticker_symbol.upper()} is consolidating in equilibrium without a confirmed directional reversal."
+
     return {
         "ticker": ticker_symbol.upper(),
         "timestamp": str(latest.name),
@@ -437,11 +629,19 @@ def get_snapshot(ticker_symbol: str, period: str = "1y", interval: str = "1d") -
         "trendline_projections": trendline_info,
         "macro_weekly_context": weekly_info,
         "multi_timeframe_confluence": confluence,
+        "reversal": reversal_info,
+        "executive_summary": {
+            "bottom_line": bottom_line,
+            "trend_reversal_signal": reversal_info["signal"],
+            "trend_reversal_status": reversal_info["status"],
+            "trend_reversal_confidence": reversal_info["confidence"],
+            "plain_english": reversal_info["plain_english"],
+        },
     }
 
 
 def compare_tickers(tickers: List[str], period: str = "1y") -> List[Dict[str, Any]]:
-    """Compare multiple tickers across core technical metrics and multi-timeframe confluence."""
+    """Compare multiple tickers across core technical metrics, multi-timeframe confluence, and reversal status."""
     results = []
     for t in tickers:
         try:
@@ -451,6 +651,7 @@ def compare_tickers(tickers: List[str], period: str = "1y") -> List[Dict[str, An
                 "price": snap["price"]["current"],
                 "change_pct": snap["price"]["pct_change"],
                 "regime": snap["trend"]["regime"],
+                "reversal_signal": snap["reversal"]["signal"],
                 "rsi14": snap["oscillators"]["rsi14"],
                 "macd_status": snap["oscillators"]["macd_status"],
                 "dist_sma50_pct": snap["trend"]["dist_sma50_pct"],
@@ -466,7 +667,7 @@ def compare_tickers(tickers: List[str], period: str = "1y") -> List[Dict[str, An
 
 
 def print_formatted_snapshot(data: Dict[str, Any]) -> None:
-    """Print readable Markdown snapshot to stdout."""
+    """Print readable Markdown snapshot to stdout with an Executive Plain-Language Summary."""
     p = data["price"]
     t = data["trend"]
     m = data["moving_averages"]
@@ -477,6 +678,8 @@ def print_formatted_snapshot(data: Dict[str, Any]) -> None:
     tp = data.get("trendline_projections", {})
     mtf = data.get("multi_timeframe_confluence", {})
     macro = data.get("macro_weekly_context", {})
+    rev = data.get("reversal", {})
+    exec_sum = data.get("executive_summary", {})
 
     print(f"### Technical Snapshot: ${data['ticker']} (${p['current']:.2f})")
     print(f"* **Daily Change:** {p['change']:+.2f} ({p['pct_change']:+.2f}%)")
@@ -484,6 +687,40 @@ def print_formatted_snapshot(data: Dict[str, Any]) -> None:
     if t["golden_cross"] is not None:
         gc_str = "Golden Cross active (50 SMA > 200 SMA)" if t["golden_cross"] else "Death Cross active (50 SMA < 200 SMA)"
         print(f"* **Cross Status:** {gc_str}")
+    print()
+
+    # Executive Summary (Plain English)
+    rev_icon = "🟢" if "Bullish" in rev.get("signal", "") else ("🔴" if "Bearish" in rev.get("signal", "") else "⚪")
+    print("#### 🧭 Executive Summary (Plain English)")
+    print(f"* **Bottom Line:** {exec_sum.get('bottom_line', rev.get('plain_english', 'N/A'))}")
+    print(f"* **Trend Reversal Signal:** {rev_icon} **{rev.get('signal', 'N/A')}** *(Confidence: {rev.get('confidence', 'N/A')})*")
+    print(f"  * **What this means:** {rev.get('plain_english', 'N/A')}")
+    if rev.get("triggers_detected"):
+        triggers_str = "; ".join(rev.get("triggers_detected", []))
+        print(f"  * **Active Triggers:** {triggers_str}")
+
+    # Plain language drivers
+    mom_str = f"RSI {o['rsi14']} (Overheated > 70)" if o["rsi14"] >= 70 else (f"RSI {o['rsi14']} (Oversold < 30 / Bargain)" if o["rsi14"] <= 30 else f"RSI {o['rsi14']} (Healthy Neutral)")
+    if "Bullish" in o["macd_status"]:
+        mom_str += " with positive accelerating momentum (MACD green)"
+    else:
+        mom_str += " with decelerating momentum (MACD red)"
+
+    floor_str = f"Holding above 50-day line (${m['SMA50']})" if (m['SMA50'] and p['current'] > m['SMA50']) else f"Below 50-day line (${m['SMA50']}); watch 200-day floor (${m['SMA200']})"
+    
+    vol_ratio = vol.get("ratio_to_avg", 1.0)
+    vol_str = f"{vol_ratio}x normal volume"
+    if vol.get('up_down_volume_ratio_20d', 1.0) >= 1.2:
+        vol_str += " with strong institutional accumulation (buyers dominating)"
+    elif vol.get('up_down_volume_ratio_20d', 1.0) <= 0.8:
+        vol_str += " with active institutional distribution (sellers dominating)"
+    else:
+        vol_str += " (balanced buying and selling)"
+
+    print(f"* **Key Driver Takeaways:**")
+    print(f"  - **Momentum:** {mom_str}.")
+    print(f"  - **Support & Safety Floors:** {floor_str}. Nearest swing floor is ${lvl.get('swing_low_20d', 'N/A')}.")
+    print(f"  - **Institutional Activity:** {vol_str}.")
     print()
 
     # Multi-Timeframe Alignment Banner
@@ -495,20 +732,21 @@ def print_formatted_snapshot(data: Dict[str, Any]) -> None:
         print(f"* **Tactical Guidance:** {mtf['tactical_guidance']}")
         print()
 
-    print("| Metric / Indicator | Value | Status / Signal | Context Threshold |")
+    print("| Metric / Indicator | Value | Status / Signal | Plain-English Meaning & Context |")
     print("| :--- | :--- | :--- | :--- |")
-    print(f"| **RSI (14D)** | {o['rsi14']} | {o['rsi14_status']} | Overbought > 70, Oversold < 30 |")
-    print(f"| **MACD (12, 26, 9)** | Line: {o['macd_line']} / Hist: {o['macd_hist']} | {o['macd_status']} | Momentum confirmation |")
-    print(f"| **20-Day SMA** | ${m['SMA20']} | Distance: {t['dist_sma20_pct']}% | Short-term momentum floor |")
-    print(f"| **50-Day SMA** | ${m['SMA50']} | Distance: {t['dist_sma50_pct']}% | Medium-term institutional trend |")
-    print(f"| **200-Day SMA** | ${m['SMA200']} | Distance: {t['dist_sma200_pct']}% | Macro cycle boundary |")
+    print(f"| **RSI (14D)** | {o['rsi14']} | {o['rsi14_status']} | Speed gauge (0-100). >70 is overheated, <30 is bargain/oversold. |")
+    print(f"| **MACD (12, 26, 9)** | Line: {o['macd_line']} / Hist: {o['macd_hist']} | {o['macd_status']} | Directional momentum. Green (Hist > 0) means buyers accelerating. |")
+    print(f"| **20-Day SMA** | ${m['SMA20']} | Distance: {t['dist_sma20_pct']:+.1f}% | Short-term (~1 month) momentum floor. |")
+    print(f"| **50-Day SMA** | ${m['SMA50']} | Distance: {t['dist_sma50_pct']:+.1f}% | Medium-term (~10 week) institutional trend boundary. |")
+    print(f"| **200-Day SMA** | ${m['SMA200']} | Distance: {t['dist_sma200_pct']:+.1f}% | Macro (~10 month) line in the sand separating bull and bear markets. |")
     if v["bb_upper"] and v["bb_lower"]:
-        print(f"| **Bollinger Bands** | Upper: ${v['bb_upper']} / Lower: ${v['bb_lower']} | %B: {v['bb_pct_b']} | 20D ± 2σ channel |")
+        bb_meaning = "Trading at upper volatility ceiling (>95% stretched)" if (v['bb_pct_b'] and v['bb_pct_b'] > 0.9) else ("Trading at lower volatility floor (<10% stretched)" if (v['bb_pct_b'] and v['bb_pct_b'] < 0.1) else "Trading comfortably inside normal volatility channel")
+        print(f"| **Bollinger Bands** | Upper: ${v['bb_upper']} / Lower: ${v['bb_lower']} | %B: {v['bb_pct_b']} | {bb_meaning}. |")
     if v["atr14"]:
-        print(f"| **ATR (14D)** | ${v['atr14']} | Volatility Range | Daily expected swing range |")
-    print(f"| **Volume (vs 20D Avg)** | {vol['current']:,} vs {vol['avg_20d']:,} | {vol['ratio_to_avg']}x Avg | Institutional participation |")
-    print(f"| **On-Balance Volume (OBV)**| {vol.get('obv_current', 0):,} | {vol.get('obv_trend', 'N/A')} | 20D cumulative volume flow |")
-    print(f"| **Up/Down Vol Ratio (20D)**| {vol.get('up_down_volume_ratio_20d', 1.0)}x | {'Buyer Dominance' if vol.get('up_down_volume_ratio_20d', 1.0) >= 1.2 else 'Neutral/Balanced'} | Institutional accumulation ratio |")
+        print(f"| **ATR (14D Volatility)**| ${v['atr14']} | Swing Buffer | Expected typical daily dollar swing up or down. |")
+    print(f"| **Volume (vs 20D Avg)** | {vol['current']:,} vs {vol['avg_20d']:,} | {vol['ratio_to_avg']}x Avg | Institutional trading activity level relative to 20-day normal pace. |")
+    print(f"| **On-Balance Volume (OBV)**| {vol.get('obv_current', 0):,} | {vol.get('obv_trend', 'N/A')} | Cumulative volume trend showing whether funds are accumulating or dumping. |")
+    print(f"| **Up/Down Vol Ratio (20D)**| {vol.get('up_down_volume_ratio_20d', 1.0)}x | {'Buyer Dominance' if vol.get('up_down_volume_ratio_20d', 1.0) >= 1.2 else ('Seller Dominance' if vol.get('up_down_volume_ratio_20d', 1.0) <= 0.8 else 'Neutral / Balanced')} | Volume on up days vs down days over last 20 sessions. |")
     print()
     print("#### Key Support & Resistance Levels")
     print(f"* **52-Week Range:** ${lvl['52_week_low']} - ${lvl['52_week_high']} (Current at {lvl['52_week_position_pct']}% of range)")
@@ -538,6 +776,11 @@ def main():
     snap_p.add_argument("--interval", default="1d", help="Interval (default: 1d)")
     snap_p.add_argument("--json", action="store_true", help="Output raw JSON")
 
+    rev_p = subparsers.add_parser("reversal", help="Check deterministic trend reversal signals and divergence")
+    rev_p.add_argument("ticker", help="Stock ticker symbol")
+    rev_p.add_argument("--period", default="1y", help="Historical period")
+    rev_p.add_argument("--json", action="store_true", help="Output raw JSON")
+
     lvl_p = subparsers.add_parser("levels", help="Compute structural support, resistance, and pivot levels")
     lvl_p.add_argument("ticker", help="Stock ticker symbol")
     lvl_p.add_argument("--period", default="1y", help="Historical period")
@@ -566,6 +809,25 @@ def main():
                 print(json.dumps(data, indent=2))
             else:
                 print_formatted_snapshot(data)
+        elif args.command == "reversal":
+            data = get_snapshot(args.ticker, period=args.period)
+            rev = data.get("reversal", {})
+            if args.json:
+                print(json.dumps(rev, indent=2))
+            else:
+                p = data["price"]
+                print(f"### Trend Reversal Analysis: ${data['ticker']} (${p['current']:.2f})")
+                rev_icon = "🟢" if "Bullish" in rev.get("signal", "") else ("🔴" if "Bearish" in rev.get("signal", "") else "⚪")
+                print(f"* **Signal:** {rev_icon} **{rev.get('signal')}** ({rev.get('status')})")
+                print(f"* **Confidence:** {rev.get('confidence')}")
+                print(f"* **Plain-English Summary:** {rev.get('plain_english')}")
+                print(f"* **Active Triggers:**")
+                for trig in rev.get("triggers_detected", []):
+                    print(f"  - {trig}")
+                if rev.get("bullish_triggers"):
+                    print(f"* **Bullish Factors ({len(rev['bullish_triggers'])}):** {'; '.join(rev['bullish_triggers'])}")
+                if rev.get("bearish_triggers"):
+                    print(f"* **Bearish Factors ({len(rev['bearish_triggers'])}):** {'; '.join(rev['bearish_triggers'])}")
         elif args.command == "levels":
             data = get_snapshot(args.ticker, period=args.period)
             if args.json:
@@ -612,13 +874,16 @@ def main():
             if args.json:
                 print(json.dumps(data, indent=2))
             else:
-                print(f"| Ticker | Price | 1D Change | Daily Regime | RSI(14) | MACD Status | vs 50D SMA | vs 200D SMA | Macro Alignment |")
-                print(f"| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
+                print(f"| Ticker | Price | 1D Change | Daily Regime | Reversal Signal | RSI(14) | MACD Status | vs 50D SMA | vs 200D SMA | Macro Alignment |")
+                print(f"| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
                 for item in data:
                     if "error" in item:
-                        print(f"| {item['ticker']} | Error: {item['error']} | - | - | - | - | - | - | - |")
+                        print(f"| {item['ticker']} | Error: {item['error']} | - | - | - | - | - | - | - | - |")
                     else:
-                        print(f"| **{item['ticker']}** | ${item['price']} | {item['change_pct']:+.2f}% | {item['regime']} | {item['rsi14']} | {item['macd_status']} | {item['dist_sma50_pct']:+.1f}% | {item['dist_sma200_pct']:+.1f}% | **{item['macro_alignment']}** |")
+                        print(f"| **{item['ticker']}** | ${item['price']} | {item['change_pct']:+.2f}% | {item['regime']} | {item.get('reversal_signal', 'N/A')} | {item['rsi14']} | {item['macd_status']} | {item['dist_sma50_pct']:+.1f}% | {item['dist_sma200_pct']:+.1f}% | **{item['macro_alignment']}** |")
+    except Exception as e:
+        sys.stderr.write(f"Error executing command: {str(e)}\n")
+        sys.exit(1)
     except Exception as e:
         sys.stderr.write(f"Error executing command: {str(e)}\n")
         sys.exit(1)

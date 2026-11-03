@@ -111,3 +111,30 @@ A holistic execution protocol must define not just where to buy, but exactly whe
   - *Rule:* **Systematic Overbought Trims.** While Tier 1A/1B assets are core compounding compounders, do not hold passively through euphoric parabolic run-ups. When an asset becomes heavily overbought (confluence of **RSI $\ge 70–75$**, price extended **$\ge 15\%–20\%$ above 50D SMA** or **$\ge 35\%–50\%$ above 200D SMA**, and Bollinger Band $\%B \ge 1.00$), systematically trim **20% – 33%** to lock in outsized gains into cash equivalents. Re-deploy banked capital when the stock pulls back to test structural 50D/200D SMA support shelves.
 * **Tier 2 / Tier 3 Cyclicals & SMB High-Beta (e.g., SHOP, MU, AMD):**
   - *Rule:* **Strictly Enforce Aggressive Technical Offloads.** Cyclicals and high SMB churn businesses experience violent multiple compression. When technical indicators flash parabolic exhaustion (RSI > 75, %B > 1.0) or approach 52-week highs, systematically offload 33–50% to bank cash.
+
+---
+
+## 7. Deterministic Trend Reversal & Divergence Signals
+
+Trend reversals occur when institutional buying or selling momentum becomes exhausted, leading to a structural change in price direction. The deterministic engine evaluates 5 specific components across a 3–5 bar and 25-bar lookback window:
+
+### 1. Bullish Trend Reversal Components
+* **MACD Bullish Crossover:** Within the last 3 sessions, MACD line crossed above Signal line (MACD histogram switched from $\le 0$ to $> 0$), confirming short-term buyer acceleration.
+* **RSI Oversold Bounce:** RSI was deeply oversold ($\le 32$) within the last 5 sessions and has curled upward above 32, confirming seller exhaustion.
+* **Moving Average Reclaim:** Price crossed back above the 20-day SMA or 50-day SMA after being suppressed below it.
+* **Bollinger Lower Band Rebound:** Price tested the lower volatility boundary ($\%B < 0.05$) and rebounded back into the primary channel ($\%B \ge 0.15$).
+* **Regular Bullish Divergence:** Over a 25-bar lookback, price forms a lower swing low ($P_2 < P_1$) while RSI forms a higher swing low ($\text{RSI}_2 \ge \text{RSI}_1 + 2.0$). This reveals that downside price action is occurring on diminishing negative momentum.
+
+### 2. Bearish Trend Reversal Components
+* **MACD Bearish Crossover:** Within the last 3 sessions, MACD line crossed below Signal line (MACD histogram switched from $\ge 0$ to $< 0$), confirming short-term seller acceleration.
+* **RSI Overbought Roll-Over:** RSI was overheated ($\ge 68$) within the last 5 sessions and has rolled over downward below 68, confirming buyer fatigue.
+* **Moving Average Breakdown:** Price cracked below the 20-day SMA or 50-day SMA after trading above it.
+* **Bollinger Upper Band Rejection:** Price stretched beyond the upper volatility boundary ($\%B > 0.95$) and failed, closing back into the channel ($\%B \le 0.85$).
+* **Regular Bearish Divergence:** Over a 25-bar lookback, price pushes to a higher swing high ($P_2 > P_1$) while RSI forms a lower swing high ($\text{RSI}_2 \le \text{RSI}_1 - 2.0$). This reveals that upward price expansion is unsupported by underlying momentum.
+
+### 3. Reversal Signal Classifications
+* **🟢 Bullish Reversal (Confirmed):** $\ge 2$ bullish triggers active and no dominant bearish triggers. High statistical probability of upward trend shift.
+* **🟢 Bullish Reversal (Early / Emerging):** 1 bullish trigger active. Early indication of bottoming; requires breakout follow-through.
+* **🔴 Bearish Reversal (Confirmed):** $\ge 2$ bearish triggers active and no dominant bullish triggers. High statistical probability of downward trend shift / correction.
+* **🔴 Bearish Reversal (Early / Emerging):** 1 bearish trigger active. Warning sign of buying fatigue; elevated risk of rollover.
+* **⚪ No Reversal (Trend Continuing):** Zero reversal triggers active. The prevailing macro/intermediate trend remains healthy and undisturbed.

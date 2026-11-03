@@ -38,6 +38,27 @@
           "min_length": 3
         }
       ]
+    },
+    {
+      "id": "eval-ta-trend-reversal-detection",
+      "description": "Verifies that scripts/ta.py snapshot calculates deterministic reversal signals, status, confidence, plain-English summary, and driver takeaways.",
+      "command": "uv run ~/.agents/skills/technical-analysis/scripts/ta.py snapshot AAPL --json",
+      "assertions": [
+        {
+          "type": "json_keys_present",
+          "keys": ["reversal", "executive_summary"]
+        },
+        {
+          "type": "json_subkeys_present",
+          "parent_key": "reversal",
+          "keys": ["signal", "status", "confidence", "plain_english", "triggers_detected", "bullish_triggers", "bearish_triggers"]
+        },
+        {
+          "type": "json_subkeys_present",
+          "parent_key": "executive_summary",
+          "keys": ["bottom_line", "trend_reversal_signal", "trend_reversal_status", "trend_reversal_confidence", "plain_english"]
+        }
+      ]
     }
   ]
 }
